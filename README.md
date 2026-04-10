@@ -80,7 +80,7 @@ Create `~/Library/LaunchAgents/com.newsdigest.plist`:
   <key>ProgramArguments</key>
   <array>
     <string>/usr/bin/python3</string>
-    <string>/path/to/news-digest/scraper.py</string>
+    <string>/path/to/news-digest/main.py</string>
   </array>
   <key>RunAtLoad</key><true/>
   <key>StandardOutPath</key><string>/tmp/newsdigest.log</string>
@@ -127,7 +127,10 @@ DIGEST_INTERVAL_HOURS = 24  # digest once a day
 | File | Purpose |
 |------|---------|
 | `config.py` | All settings — edit this |
-| `scraper.py` | Main runner & scheduler |
+| `main.py` | Main runner & scheduler |
+| `scraper.py` | Backward-compatible wrapper entrypoint |
+| `db.py` | SQLite persistence layer for stored/sent articles |
+| `dedup.py` | Content hashing + deduplication helpers |
 | `sources.py` | NewsAPI + RSS fetching |
 | `analyzer.py` | Groq (Llama) summarization & filtering |
 | `emailer.py` | HTML email builder & sender |

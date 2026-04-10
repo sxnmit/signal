@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
-# ============================================================
-#  scraper.py — Main entry point
-#  Run once:        python scraper.py --now
-#  Run on schedule: python scraper.py
-# ============================================================
+"""Backward-compatible entrypoint.
+
+Use `python main.py` for the canonical pipeline runner.
+"""
 
 import sys
 import schedule
 import time
 from datetime import datetime
+from main import main
 
 from config import (
     CLAUDE_SEARCH_TOPICS,

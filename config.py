@@ -4,8 +4,8 @@
 # ============================================================
 
 import os
-
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # --- Groq (summarization; free tier at https://console.groq.com) ---
@@ -38,25 +38,24 @@ DIGEST_INTERVAL_HOURS = 24  # 1x per day
 
 # --- Tech & CS Topics (used for NewsAPI + RSS + Groq summarization) ---
 CLAUDE_SEARCH_TOPICS = [
-    "OpenAI, Anthropic, Google DeepMind latest AI research and product news",
+    "Latest AI developments",
     "software engineering tools and developer productivity news",
     "big tech layoffs, hiring trends, and software job market",
     "startups and venture capital funding news Silicon Valley",
     "product management trends and frameworks news",
     "open source software major releases and community news",
-    "cloud computing AWS Azure Google Cloud latest developments",
+    "cloud computing latest developments",
     "programming languages trends news",
     "semiconductor and chip industry news NVIDIA AMD Intel",
     "cybersecurity major breaches vulnerabilities news",
-    "developer ecosystem news",
 ]
 
 # --- World & Geopolitics Topics ---
 REGION_TOPICS = [
     "Canada political news and government policy today",
-    "US relations trade war and tech decoupling news",
-    "European Union politics economy and regulation news",
-    "India economy technology and geopolitics news",
+    "US politics and internaitonal news",
+    "India economy technology and political news",
+    "Chinese technology economy and political news",
     "United Nations and global diplomacy major developments",
     "global economy inflation interest rates and markets news",
 ]
@@ -71,6 +70,7 @@ NEWSAPI_QUERIES = [
     "Canada's economy and politics",
     "Global politics",
 ]
+
 NEWSAPI_LANGUAGE = "en"
 NEWSAPI_MAX_ARTICLES = 5  # per query
 

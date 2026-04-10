@@ -26,6 +26,8 @@ def analyze_topic(topic: str, articles: list[dict]) -> dict:
     Ask Groq (Llama 3.3 70B) to filter and summarize
     the pre-fetched articles for a given topic.
     """
+    if not articles:
+        return {"topic": topic, "stories": [], "raw": "No articles provided"}
     if not GROQ_API_KEY or GROQ_API_KEY.strip() == "":
         print(f"  [Groq] No API key set; skipping summarization for '{topic[:50]}...'")
         return {"topic": topic, "stories": [], "raw": "No API key"}
@@ -86,7 +88,14 @@ def parse_stories(text: str) -> list[dict]:
                 story["url"] = line[len("URL:") :].strip()
             elif line.startswith("SUMMARY:"):
                 story["summary"] = line[len("SUMMARY:") :].strip()
-        if story["headline"]:
+        
+        # Only include stories with all required fields and non-placeholder content
+        if (story["headline"] 
+            and story["source"] 
+            and story["url"] 
+            and story["summary"]
+            and not any(placeholder in story["headline"].lower() 
+                       for placeholder in ["no ", "unavailable", "n/a", "not available"])):
             stories.append(story)
 
     return stories
