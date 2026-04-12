@@ -5,7 +5,7 @@
 .env
 
 # SQLite database file
-news_digest.db
+# news_digest.db - run via github actions needs to be updated every tiem the workflow runs.
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
