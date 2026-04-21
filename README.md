@@ -40,8 +40,6 @@ Edit `.env` and set:
 - `SENDER_PASSWORD` — Gmail App Password (16 chars from apppasswords)
 - `RECIPIENT_EMAILS` — one or more addresses, comma-separated
 
-The app loads `.env` automatically. `.env` is in `.gitignore` so it won’t be committed.
-
 ---
 
 ## Running
