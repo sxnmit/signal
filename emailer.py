@@ -12,8 +12,8 @@ from config import EMAIL_CONFIG
 
 
 TOPIC_COLORS = [
-    "#2563eb", "#7c3aed", "#059669", "#dc2626",
-    "#d97706", "#0891b2", "#be185d", "#65a30d",
+    "#1e40af", "#0891b2", "#059669", "#7c3aed",
+    "#dc2626", "#d97706", "#64748b", "#a855f7",
 ]
 
 
@@ -21,13 +21,6 @@ def build_html(digest_sections: list[dict]) -> str:
     # Only include topics that have at least one story
     sections = [s for s in digest_sections if s.get("stories")]
     today = datetime.now().strftime("%A, %B %d, %Y")
-
-    topic_nav = "\n".join(
-        f'<a href="#topic-{i}" style="display:inline-block;margin:4px 6px;padding:5px 14px;'
-        f'background:{TOPIC_COLORS[i % len(TOPIC_COLORS)]};color:#fff;border-radius:20px;'
-        f'font-size:13px;text-decoration:none;">{html.escape(s["topic"])}</a>'
-        for i, s in enumerate(sections)
-    )
 
     sections_html = ""
     for i, section in enumerate(sections):
@@ -50,7 +43,7 @@ def build_html(digest_sections: list[dict]) -> str:
                 </div>"""
 
         sections_html += f"""
-        <div id="topic-{i}" style="margin-bottom:40px;">
+        <div style="margin-bottom:40px;">
             <h2 style="font-size:18px;font-weight:700;color:#fff;background:{color};
                        padding:10px 16px;border-radius:6px;margin:0 0 16px 0;">
                 {html.escape(section['topic'])}
@@ -68,7 +61,6 @@ def build_html(digest_sections: list[dict]) -> str:
     <div style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);padding:32px 32px 24px;text-align:center;">
       <div style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px;">📡 Daily News Digest</div>
       <div style="color:#bfdbfe;margin-top:6px;font-size:14px;">{today}</div>
-      <div style="margin-top:16px;">{topic_nav}</div>
     </div>
 
     <!-- Body -->
