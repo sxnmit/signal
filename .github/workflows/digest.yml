@@ -1,0 +1,74 @@
+name: Daily digest
+
+on:
+  schedule:
+    # 12:00 UTC — around 8am Eastern.
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build the digest but deliver nothing"
+        type: boolean
+        default: false
+
+concurrency:
+  group: digest
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  digest:
+    name: Assemble and deliver
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -e .
+
+      - name: Run
+        env:
+          # v1's secret names, unchanged — nothing to rotate or rename.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
+          SIGNAL_WEBHOOK_URL: ${{ secrets.SIGNAL_WEBHOOK_URL }}
+          SIGNAL_SITE_BASE_URL: ${{ vars.SIGNAL_SITE_BASE_URL }}
+        run: signal run --no-site ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      # Only the archive is committed: one small JSON file per edition, which
+      # diffs cleanly and is all Signal needs to know what it has already sent.
+      # v1 committed a 3 MB SQLite file on every run instead.
+      - name: Commit the new edition
+        if: ${{ !inputs.dry_run }}
+        run: |
+          if [ -z "$(git status --porcelain archive/)" ]; then
+            echo "No new edition to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add archive/
+          git commit -m "Add digest for $(date -u +%Y-%m-%d)"
+          git push
+
+  publish:
+    name: Publish the archive site
+    needs: digest
+    if: ${{ !inputs.dry_run }}
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

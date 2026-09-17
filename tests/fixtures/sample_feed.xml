@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example Tech</title>
+    <link>https://example.com</link>
+    <description>Test feed</description>
+    <item>
+      <title>Nvidia unveils Rubin data center GPU</title>
+      <link>https://example.com/nvidia-rubin?utm_source=rss&amp;utm_medium=feed</link>
+      <description>&lt;p&gt;Nvidia announced &lt;b&gt;Rubin&lt;/b&gt; today.&lt;/p&gt;</description>
+      <pubDate>Wed, 16 Sep 2026 14:30:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Rust stabilises async traits</title>
+      <link>https://example.com/rust-async</link>
+      <description>The release closes a long-standing gap.</description>
+      <pubDate>Wed, 16 Sep 2026 09:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title></title>
+      <link>https://example.com/no-title</link>
+      <description>Should be skipped: no title.</description>
+    </item>
+    <item>
+      <title>Missing link entry</title>
+      <description>Should be skipped: no link.</description>
+    </item>
+  </channel>
+</rss>

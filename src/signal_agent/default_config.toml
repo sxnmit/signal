@@ -1,0 +1,346 @@
+# ==========================================================================
+#  Signal — default configuration
+#
+#  `signal init` copies this file into your project so you can edit it.
+#  Anything you leave out falls back to the values here, so a user config can
+#  be as short as a single [email] block.
+#
+#  Secrets never belong in this file. Put them in .env (see .env.example);
+#  every key below can also be overridden by an environment variable.
+# ==========================================================================
+
+title = "Signal"
+tagline = "The stories that mattered today, and who else ran them."
+
+[fetch]
+# Only consider articles published within this window.
+window_hours = 36
+# Per-request HTTP timeout, in seconds.
+timeout_seconds = 12
+# Feeds are fetched concurrently; this caps the worker pool.
+max_workers = 12
+user_agent = "signal/2.0 (+https://github.com/sxnmit/signal)"
+
+[dedup]
+# Articles whose titles overlap by at least this much are treated as the same
+# story. Raise it if unrelated stories are being merged; lower it if obvious
+# duplicates slip through. 0.0-1.0.
+similarity_threshold = 0.35
+# Remember articles for this many days so a story is never sent twice; older
+# rows are pruned on each run to keep the database small.
+retention_days = 90
+
+[rank]
+# Half-life of the recency bonus, in hours.
+recency_half_life_hours = 18.0
+# How much a story gains from being covered by several independent outlets.
+corroboration_weight = 0.55
+# Drop anything scoring below this before it reaches the summarizer.
+min_score = 0.15
+# Hard cap on stories per topic, before each topic's own max_stories applies.
+max_stories_per_topic = 5
+# Never spend summarizer calls on more than this many clusters per run.
+max_clusters_per_run = 60
+
+[summarize]
+# "extractive" needs no API key and no network. "llm" calls a chat-completions
+# endpoint; "auto" uses the LLM when a key is present and quietly falls back.
+provider = "auto"
+# Any OpenAI-compatible endpoint works: Groq, OpenAI, Together, OpenRouter,
+# a local Ollama, vLLM... Anthropic's API is supported natively too.
+api = "openai"           # "openai" | "anthropic"
+base_url = "https://api.groq.com/openai/v1"
+model = "llama-3.3-70b-versatile"
+api_key_env = "GROQ_API_KEY"
+max_tokens = 2000
+temperature = 0.2
+# Summarize this many topics per batch request.
+timeout_seconds = 60
+retries = 2
+
+[store]
+path = "news_digest.db"
+
+[archive]
+# One JSON file per edition. Small, diffable, and the input to the static site.
+enabled = true
+directory = "archive"
+
+[site]
+# `signal site` renders the archive into a static, searchable website.
+enabled = true
+directory = "site"
+base_url = ""
+
+[email]
+enabled = true
+smtp_host = "smtp.gmail.com"
+smtp_port = 587
+sender = ""
+password = ""
+recipients = []
+# Send one message per recipient so addresses are never disclosed to each other.
+private_recipients = true
+subject_template = "{icon} {title} — {date}"
+
+[webhook]
+# Post the digest to Slack, Discord, or anything that accepts a JSON payload.
+enabled = false
+url = ""
+format = "slack"         # "slack" | "discord" | "json"
+
+[newsapi]
+enabled = true
+api_key_env = "NEWS_API_KEY"
+language = "en"
+max_articles = 5
+page_size = 20
+
+[hackernews]
+# Front-page stories above a points threshold. No API key required.
+enabled = true
+min_points = 120
+max_articles = 25
+
+# --------------------------------------------------------------------------
+#  Feeds
+#
+#  weight nudges ranking: 1.3 means "I trust this outlet"; 0.8 means "include
+#  it, but it loses ties".
+# --------------------------------------------------------------------------
+[[feeds]]
+url = "https://feeds.arstechnica.com/arstechnica/index"
+name = "Ars Technica"
+weight = 1.2
+
+[[feeds]]
+url = "https://www.theverge.com/rss/index.xml"
+name = "The Verge"
+weight = 1.0
+
+[[feeds]]
+url = "https://feeds.feedburner.com/TechCrunch"
+name = "TechCrunch"
+weight = 1.0
+
+[[feeds]]
+url = "https://www.wired.com/feed/rss"
+name = "WIRED"
+weight = 1.0
+
+[[feeds]]
+url = "https://www.technologyreview.com/feed/"
+name = "MIT Technology Review"
+weight = 1.25
+
+[[feeds]]
+url = "https://stratechery.com/feed/"
+name = "Stratechery"
+weight = 1.3
+
+[[feeds]]
+url = "https://simonwillison.net/atom/everything/"
+name = "Simon Willison"
+weight = 1.15
+
+[[feeds]]
+url = "https://hnrss.org/frontpage?points=150"
+name = "Hacker News"
+weight = 0.9
+
+[[feeds]]
+url = "https://feeds.bbci.co.uk/news/world/rss.xml"
+name = "BBC World"
+weight = 1.2
+
+[[feeds]]
+url = "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
+name = "NYT Technology"
+weight = 1.2
+
+[[feeds]]
+url = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+name = "NYT World"
+weight = 1.2
+
+[[feeds]]
+url = "https://feeds.a.dj.com/rss/RSSWorldNews.xml"
+name = "WSJ World"
+weight = 1.15
+
+[[feeds]]
+url = "https://rss.politico.com/politics-news.xml"
+name = "Politico"
+weight = 1.0
+
+[[feeds]]
+url = "https://feeds.foreignaffairs.com/rss/rss.xml"
+name = "Foreign Affairs"
+weight = 1.2
+
+[[feeds]]
+url = "https://www.economist.com/finance-and-economics/rss.xml"
+name = "The Economist"
+weight = 1.25
+
+[[feeds]]
+url = "https://www.cbc.ca/webfeed/rss/rss-canada"
+name = "CBC Canada"
+weight = 1.1
+
+# --------------------------------------------------------------------------
+#  Topics
+#
+#  keywords drive both routing (which topic an article belongs to) and
+#  ranking (how strongly it belongs). query is sent to NewsAPI.
+# --------------------------------------------------------------------------
+[[topics]]
+name = "Artificial Intelligence"
+slug = "ai"
+icon = "🧠"
+query = "artificial intelligence OR LLM OR \"machine learning\""
+max_stories = 5
+keywords = [
+  "ai", "artificial intelligence", "llm", "large language model", "machine learning",
+  "openai", "anthropic", "claude", "gpt", "gemini", "deepmind", "mistral", "llama",
+  "neural", "transformer", "inference", "fine-tuning", "agent", "copilot", "diffusion",
+]
+
+[[topics]]
+name = "Software & Developer Tools"
+slug = "dev"
+icon = "🛠️"
+query = "software engineering OR developer tools OR programming language"
+max_stories = 4
+keywords = [
+  "developer", "programming", "framework", "compiler", "runtime", "rust", "python",
+  "typescript", "javascript", "golang", "kubernetes", "docker", "git", "github",
+  "release", "version", "api", "sdk", "database", "postgres", "ide", "debugger",
+]
+
+[[topics]]
+name = "Startups & Venture Capital"
+slug = "startups"
+icon = "🚀"
+query = "startup funding OR venture capital OR seed round"
+max_stories = 4
+keywords = [
+  "startup", "venture", "vc", "funding", "seed round", "series a", "series b",
+  "valuation", "raised", "acquisition", "acquires", "ipo", "y combinator",
+  "a16z", "sequoia", "term sheet", "unicorn",
+]
+
+[[topics]]
+name = "Chips & Hardware"
+slug = "chips"
+icon = "🔩"
+query = "semiconductor OR chip manufacturing OR NVIDIA OR TSMC"
+max_stories = 3
+keywords = [
+  "chip", "semiconductor", "nvidia", "amd", "intel", "tsmc", "arm", "asml",
+  "gpu", "cpu", "silicon", "fab", "foundry", "wafer", "nanometer", "datacenter hardware",
+]
+
+[[topics]]
+name = "Security & Privacy"
+slug = "security"
+icon = "🔐"
+query = "cybersecurity breach OR vulnerability OR ransomware"
+max_stories = 4
+keywords = [
+  "cybersecurity", "data breach", "vulnerability", "exploit", "ransomware", "malware",
+  "phishing", "zero-day", "rce", "cve", "hacked", "encryption", "privacy",
+  "surveillance", "gdpr", "security patch", "backdoor", "infosec",
+]
+
+[[topics]]
+name = "Cloud & Infrastructure"
+slug = "cloud"
+icon = "☁️"
+query = "cloud computing OR AWS OR Azure OR data center"
+max_stories = 3
+keywords = [
+  "cloud", "aws", "azure", "google cloud", "gcp", "data center", "datacenter",
+  "serverless", "infrastructure", "outage", "latency", "cdn", "cloudflare", "uptime",
+]
+
+[[topics]]
+name = "Tech Business & Jobs"
+slug = "business"
+icon = "💼"
+query = "tech layoffs OR tech hiring OR big tech earnings"
+max_stories = 4
+keywords = [
+  "layoff", "layoffs", "hiring", "job market", "big tech", "earnings", "revenue",
+  "antitrust", "regulator", "lawsuit", "ftc", "doj", "apple", "google", "microsoft", "meta",
+  "amazon", "tesla", "restructuring", "workforce",
+]
+
+[[topics]]
+name = "Open Source"
+slug = "oss"
+icon = "🐧"
+query = "open source software release OR Linux kernel"
+max_stories = 3
+keywords = [
+  "open source", "open-source", "linux", "kernel", "apache", "foundation",
+  "maintainer", "license", "gpl", "mit license", "fork", "contributor", "repository",
+]
+
+[[topics]]
+name = "World & Geopolitics"
+slug = "world"
+icon = "🌍"
+query = "international diplomacy OR geopolitics OR United Nations"
+max_stories = 5
+keywords = [
+  "election", "parliament", "president", "prime minister", "sanctions", "treaty",
+  "diplomacy", "united nations", "security council", "peacekeeping", "nato",
+  "ceasefire", "conflict", "border", "summit", "foreign policy", "war", "protest",
+  "referendum", "mandate", "undersea cable",
+]
+
+[[topics]]
+name = "Markets & Economy"
+slug = "markets"
+icon = "📈"
+query = "inflation OR interest rates OR global markets"
+max_stories = 4
+keywords = [
+  "inflation", "interest rate", "central bank", "federal reserve", "gdp",
+  "recession", "unemployment", "markets", "stocks", "bonds", "currency",
+  "tariff", "trade deficit", "oil prices", "housing", "yield",
+]
+
+[[topics]]
+name = "Canada"
+slug = "canada"
+icon = "🍁"
+query = "Canada politics OR Canadian economy"
+max_stories = 3
+keywords = [
+  "canada", "canadian", "ottawa", "ontario", "quebec", "alberta", "british columbia",
+  "toronto", "vancouver", "bank of canada", "loonie", "trudeau", "carney", "parliament hill",
+]
+
+[[topics]]
+name = "India"
+slug = "india"
+icon = "🇮🇳"
+query = "India economy OR Indian technology sector"
+max_stories = 3
+keywords = [
+  "india", "indian", "delhi", "mumbai", "bengaluru", "bangalore", "modi",
+  "reserve bank of india", "rupee", "infosys", "reliance", "tata", "upi",
+]
+
+[[topics]]
+name = "China"
+slug = "china"
+icon = "🇨🇳"
+query = "China technology OR Chinese economy"
+max_stories = 3
+keywords = [
+  "china", "chinese", "beijing", "shanghai", "shenzhen", "hong kong", "taiwan",
+  "xi jinping", "yuan", "renminbi", "alibaba", "tencent", "bytedance", "huawei", "byd",
+]

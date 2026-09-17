@@ -1,27 +1,40 @@
-# Python virtual environment
-.venv/
-
-# Environment variables
+# Secrets — never commit a filled-in .env
 .env
 
-# SQLite database file
-# news_digest.db - run via github actions needs to be updated every tiem the workflow runs.
+# Local state. The archive in archive/ is the durable record and IS committed;
+# the database is a rebuildable cache, so it stays out of git. v1 committed it
+# on every run, which is why this repository's history is 50 identical
+# "Update news database" commits.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
 
-# Byte-compiled / optimized / DLL files
+# Generated site (built in CI and published to Pages)
+site/
+
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
 
-# VS Code settings
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Editors and OS
 .vscode/
-
-# OS files
+.idea/
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log
-
-# Editor temporary files
 *.swp
 *~

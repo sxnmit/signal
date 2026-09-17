@@ -1,0 +1,52 @@
+name: Publish site
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+# Pages deployments must not overlap, but a queued one should still run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The digest job may have just pushed a new edition.
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -e .
+
+      - uses: actions/configure-pages@v5
+        id: pages
+
+      - name: Build the site
+        env:
+          SIGNAL_SITE_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: signal site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - uses: actions/deploy-pages@v4
+        id: deploy

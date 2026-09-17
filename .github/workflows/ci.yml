@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check src tests
+
+      - name: Format
+        run: ruff format --check src tests
+
+      - name: Type check
+        run: mypy
+
+      - name: Test
+        run: pytest --cov=signal_agent --cov-report=term-missing
+
+  smoke:
+    name: End-to-end smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -e .
+
+      # The whole pipeline runs on bundled sample data: no API keys, no network,
+      # no state. If this breaks, the digest would have broken too.
+      - name: Run the demo pipeline
+        run: |
+          signal demo
+          signal demo --format markdown > /dev/null
+          signal demo --format html --output demo.html
+          test -s demo.html
+
+      - name: Check the config ships and loads
+        run: |
+          signal init --force
+          python -c "from signal_agent.config import Config; c = Config.load('signal.toml'); assert c.topics and c.feeds"
